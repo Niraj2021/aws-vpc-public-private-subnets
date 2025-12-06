@@ -1,60 +1,68 @@
-# AWS VPC with Public & Private Subnets
-This project explains how to create a safe and production-ready network on AWS.
-It uses public subnets, private subnets, a Load Balancer, and NAT Gateways.
+# AWS VPC with Public & Private Subnets (Production-Ready Architecture)
 
-📘 What You Are Building
+This repository explains how to design and deploy a secure, scalable, production-grade network on AWS.
+The architecture uses public subnets, private subnets, an Application Load Balancer (ALB), NAT Gateways, and Auto Scaling EC2 instances.
 
-You will build a network (called a VPC) that looks like this:
+📘 Architecture Overview
 
-The public subnets have:
+You will deploy an AWS VPC that includes:
 
-A Load Balancer (receives traffic from users)
+# Public Subnets
 
-A NAT Gateway (lets private servers reach the internet safely)
+Application Load Balancer (ALB) — receives traffic from users
 
-The private subnets have:
+NAT Gateways — allow private EC2 instances to securely access the internet
 
-EC2 servers (your actual application runs here)
+# Private Subnets
 
-These servers cannot be accessed from the internet
+EC2 application servers (Auto Scaling Group)
 
-But they can reach the internet through the NAT Gateway
+Not exposed to the internet
 
+Internet access only through NAT Gateway
 
-Daigram
-
-<img width="549" height="422" alt="image" src="https://github.com/user-attachments/assets/afe32e91-2510-44c3-b7a1-5276c9f863a3" />
+Secure connection to S3 through a Gateway Endpoint (optional)
 
 
-⭐ Why This Setup?
+# 🖼️ Diagram
+<img width="550" height="420" alt="architecture diagram" src="https://github.com/user-attachments/assets/afe32e91-2510-44c3-b7a1-5276c9f863a3" />
 
-This setup is used in real production systems because:
+# ⭐ Why This Architecture?
 
-Servers are safe (not exposed to internet)
+This setup is commonly used in real-world production environments because:
 
-Traffic is balanced across multiple servers
+Secure: Private servers are not exposed to the internet
 
-System stays online even if one Availability Zone fails
+Highly Available: Spreads across multiple Availability Zones
 
-Servers can still get updates from the internet using NAT Gateway
+Scalable: Auto Scaling Group adjusts capacity automatically
 
-🛠️ Step-by-Step — How to Create This Architecture
+Cost-Efficient: S3 Gateway Endpoint reduces NAT usage
 
-Below are simple steps anyone can follow in AWS.
+Stable: ALB ensures smooth traffic distribution
 
-1️⃣ Create a VPC
+# 🛠️ Step-by-Step Guide to Create This Architecture in AWS
+
+These steps are intentionally simple and easy for beginners.
+
+# 1️⃣ Create a VPC
 
 Open AWS Console
 
-Go to VPC → “Create VPC”
+Go to VPC → Create VPC
 
-Choose CIDR like:
+Select VPC only
 
-10.0.0.0/16
+Enter:
 
-2️⃣ Create 4 Subnets
+CIDR block: 10.0.0.0/16
 
-You need:
+
+Click Create VPC
+
+# 2️⃣ Create 4 Subnets
+
+You need one public and one private subnet in each Availability Zone.
 
 Subnet Type	AZ	Example Name
 Public	A	public-subnet-a
@@ -62,71 +70,79 @@ Public	B	public-subnet-b
 Private	A	private-subnet-a
 Private	B	private-subnet-b
 
-Make sure to:
+# Important:
 
-Select one subnet per Availability Zone (A and B)
+Enable Auto-assign public IPv4 = ON only for public subnets
 
-Mark public subnets with "Auto-assign public IP: ON"
+Leave public IP OFF for private subnets
 
-3️⃣ Create and Attach an Internet Gateway
+# 3️⃣ Create and Attach an Internet Gateway
 
-Go to Internet Gateway
+Open Internet Gateways
 
-Click Create
+Click Create Internet Gateway
 
 Attach it to your VPC
 
-Update the public subnet route table:
-
-Add route:
+Update public subnet route table:
 
 0.0.0.0/0 → Internet Gateway
 
-4️⃣ Create NAT Gateways (One per Public Subnet)
+# 4️⃣ Create NAT Gateways (1 per Public Subnet)
 
-Go to NAT Gateways
+Open NAT Gateways
 
-Choose each public subnet
+Create NAT Gateway in public-subnet-a
 
 Allocate an Elastic IP
 
-Create 2 NAT Gateways (one per AZ)
+Repeat for public-subnet-b
 
 Update private subnet route tables:
 
 0.0.0.0/0 → NAT Gateway
 
 
-This lets private servers reach the internet safely.
+This allows private EC2 instances to access the internet securely.
 
-5️⃣ Create an Application Load Balancer
+# 5️⃣ Create an Application Load Balancer
 
 Go to EC2 → Load Balancers
 
-Create ALB
+Create an Application Load Balancer
+
+Scheme: Internet-facing
 
 Select both public subnets
 
 Create a Target Group
 
-You will attach EC2 instances here later
+ALB will forward traffic to EC2 instances (next step)
 
-6️⃣ Create an Auto Scaling Group
+# 6️⃣ Create an Auto Scaling Group (EC2)
 
-Create a Launch Template for EC2
+Create a Launch Template
 
-Choose AMI, instance type, etc.
+Choose AMI, instance type, security group, etc.
 
-Create Auto Scaling Group
+Create an Auto Scaling Group
 
-Choose private subnets only
+Select private subnets only
 
-Attach it to your Target Group (ALB)
+Attach it to the Target Group from the ALB
 
-Now:
+Now the traffic flow becomes:
 
-Users → ALB → Private EC2 servers
+Users → ALB → EC2 in private subnets
 
-7️⃣ (Optional but Recommended) Add S3 Gateway Endpoint
+# 7️⃣ (Optional but Recommended) Add an S3 Gateway Endpoint
 
-This lets EC2 connect to S3 without using NAT Gateway.
+This allows EC2 instances to reach S3 without using the NAT Gateway.
+
+Benefits:
+
+Private connection
+
+Reduced NAT costs
+
+Faster S3 access
