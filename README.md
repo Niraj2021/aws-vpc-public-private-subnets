@@ -5,13 +5,21 @@ It uses public subnets, private subnets, a Load Balancer, and NAT Gateways.
 📘 What You Are Building
 
 You will build a network (called a VPC) that looks like this:
+
 The public subnets have:
+
 A Load Balancer (receives traffic from users)
+
 A NAT Gateway (lets private servers reach the internet safely)
+
 The private subnets have:
+
 EC2 servers (your actual application runs here)
+
 These servers cannot be accessed from the internet
+
 But they can reach the internet through the NAT Gateway
+
 
 Daigram
 
