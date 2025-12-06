@@ -3,6 +3,7 @@ This project explains how to create a safe and production-ready network on AWS.
 It uses public subnets, private subnets, a Load Balancer, and NAT Gateways.
 
 📘 What You Are Building
+
 You will build a network (called a VPC) that looks like this:
 The public subnets have:
 A Load Balancer (receives traffic from users)
@@ -15,6 +16,7 @@ But they can reach the internet through the NAT Gateway
 Daigram
 
 <img width="549" height="422" alt="image" src="https://github.com/user-attachments/assets/afe32e91-2510-44c3-b7a1-5276c9f863a3" />
+
 
 ⭐ Why This Setup?
 
